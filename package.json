@@ -1,0 +1,11 @@
+{
+  "name": "electron-views-composer",
+  "version": "0.0.1",
+  "type": "module",
+  "author": "github@projektorius96",
+  "license": "ISC",
+  "description": "Initially this repo targets my personal ongoing project 'placard.js-light', but can be used for any relevant web-to-electron application",
+  "devDependencies": {
+    "electron": "^34.0.1"
+  }
+}
