@@ -1,32 +1,37 @@
 import { app, screen, BaseWindow, WebContentsView } from 'electron';
+import { WindowManagement } from './utils/index.mjs';
 
 app.whenReady().then(() => {
 
     const
+        /* DEV_NOTE # Essentially, workAreaSize is same as WindowManagement.screenArea utility method, except that the utility does not return you {x, y} pair: */
         { workAreaSize } = screen.getPrimaryDisplay()
         ,
         parentView = new BaseWindow({
-            frame: true,
+            frame: true,/* # iff := false, it disregards `autoHideMenu` no matter what Boolean value it was assigned to:.. */
+            autoHideMenuBar: !true,
             x: 0,
             y: 0,
             width: workAreaSize.width,
             height: workAreaSize.height,
         })
         ,
-        mainPage = new WebContentsView()
+        mainPage = new WebContentsView({
+            webPreferences: {
+                disableBlinkFeatures: String('SharedAutofill')
+            }
+        })
         ;
 
     if (mainPage) {
-        const bounds = parentView.getContentBounds();
-            mainPage.setBounds({
-                x: 0,
-                y: 0,
-                width: bounds.width,
-                height: bounds.height,
-            });
-        
+
+        mainPage.setBounds({
+            ...WindowManagement.availableScreenArea(parentView)
+        });
+
         mainPage.webContents.loadFile('index.html');
         /* mainPage.webContents.openDevTools(); */// # shows the debugger
+
     }
 
     if (parentView) {
@@ -34,7 +39,7 @@ app.whenReady().then(() => {
         parentView.maximize();
 
         /**
-         * Credits to github:projektorius96 (me) for raising a relevant question, and github:nikwen for answering it 
+         * Credits to github:nikwen for putting on the right track 
          * @see {@link https://github.com/electron/electron/issues/45367#issuecomment-2620264791}
          */
         parentView.contentView.addChildView(mainPage);

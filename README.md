@@ -7,6 +7,8 @@
 1. Prerequisites: `npm ci`
 2. Run command: `npx electron main.mjs`
 
+> **Dev advice**: If you have [nodemon](https://www.npmjs.com/package/nodemon) installed on your system globally, simply run `nodemon --exec npx electron main.mjs`: _the entry file name_ (e.g. _main.mjs_) may vary tho, so beware !
+
 ---
 
 > Made with ♥ by [**projektorius96**](https://github.com/projektorius96)
