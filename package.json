@@ -8,4 +8,8 @@
   "devDependencies": {
     "electron": "^34.0.1"
   }
+  ,
+  "scripts": {
+    "start" : "nodemon --exec npx electron main.mjs"
+  }
 }
