@@ -13,7 +13,7 @@ app.whenReady().then(() => {
             frame: !true,/* DEV_NOTE # iff := false, it disregards `autoHideMenu` no matter what Boolean value it would be assigned to:.. */
             autoHideMenuBar: true,
             movable: true,
-            resizable: false,
+            resizable: !false,
             x: 0,
             y: 0,
             width: workAreaSize.width,
@@ -41,7 +41,16 @@ app.whenReady().then(() => {
 
         ipcMain.handle('action:maximize', ()=>{
             if (parentView.isMinimized){
-                parentView.maximize()
+                /* parentView.maximize() *//*
+                    > DEV_NOTE # works buggy with `parentView.on('resize')`,..
+                    thus decided to work it around with the following:
+                */
+                parentView.setBounds({
+                    x: 0,
+                    y: 0,
+                    width: workAreaSize.width,
+                    height:  workAreaSize.height,
+                })
             }
         })
 
@@ -64,8 +73,8 @@ app.whenReady().then(() => {
         if (navPage){
 
             navPage.setBounds({
-                x:0,
-                y:0,
+                x: 0,
+                y: 0,
                 width: workAreaSize.width,
                 height: navPage$workAreaSize.height,
             });
@@ -77,7 +86,7 @@ app.whenReady().then(() => {
         if (mainPage){
 
             mainPage.setBounds({
-                x:0,
+                x: 0,
                 y: navPage$workAreaSize.height,
                 width: workAreaSize.width,
                 height: Number( workAreaSize.height - navPage$workAreaSize.height ),
@@ -85,6 +94,32 @@ app.whenReady().then(() => {
             
             mainPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['modules', 'canvas', 'index.html']));
             /* mainPage.webContents.toggleDevTools(); */
+        }
+
+        if (navPage && mainPage){
+
+            parentView.on('resize', function (params) {
+                
+                parentView.setBounds({
+                    ...this.getBounds()
+                })
+
+                navPage.setBounds({
+                    x: 0,
+                    y: 0,
+                    width: parentView.getBounds().width,
+                    height: navPage$workAreaSize.height,
+                });
+
+                mainPage.setBounds({
+                    x: 0,
+                    y: navPage$workAreaSize.height,
+                    width: parentView.getBounds().width,
+                    height: Number( /* workAreaSize.height */parentView.getBounds().height - navPage$workAreaSize.height ),
+                });
+                
+            })
+
         }
 
         /**
