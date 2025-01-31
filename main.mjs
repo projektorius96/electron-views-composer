@@ -3,6 +3,8 @@ import node_path from 'node:path';
 import { app, screen, BaseWindow, WebContentsView, ipcMain } from 'electron';
 /* import { WindowManagement } from './utils/index.mjs'; */// DEV_NOTE # might use in the future...
 
+import floatWindow from './modules/shell/gui/main.js';
+
 app.whenReady().then(() => {
 
     const
@@ -32,6 +34,10 @@ app.whenReady().then(() => {
         ;
 
     if (parentView) {
+        
+        const childView = floatWindow.init(parentView);
+        /* childView.setParentWindow(parentView); */// # if you need decision being made at run-time 
+        childView.loadFile(node_path.join(node_path.resolve(), ...['modules', 'shell', 'gui', 'index.html']))
 
         ipcMain.handle('action:minimize', ()=>{
             if (parentView.isMaximized){
@@ -92,13 +98,14 @@ app.whenReady().then(() => {
                 height: Number( workAreaSize.height - navPage$workAreaSize.height ),
             });
             
-            mainPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['modules', 'canvas', 'index.html']));
+            /* mainPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['modules', 'canvas', 'index.html'])); */
+            mainPage.webContents.loadURL('http://localhost:5173');
             /* mainPage.webContents.toggleDevTools(); */
         }
 
         if (navPage && mainPage){
 
-            parentView.on('resize', function (params) {
+            parentView.on('resize', ()=>{
                 
                 parentView.setBounds({
                     ...this.getBounds()
@@ -129,6 +136,10 @@ app.whenReady().then(() => {
         parentView.on('closed', () => {
             navPage.webContents.close();
             mainPage.webContents.close();
+        });
+
+        app.on('window-all-closed', () => {
+            if (process.platform !== 'darwin') app.quit();
         });
 
     }
