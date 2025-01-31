@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'  ; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <title></title>
     <style>
@@ -16,9 +16,15 @@
     </style>
 </head>
     <body>
-        <div popover id="myPopover" open>
+        <!-- <div popover id="myPopover" open>
             This popover is shown by default.
         </div>
-        <button popovertarget="myPopover" popovertargetaction="toggle">Toggle Popover</button>
+        <button popovertarget="myPopover" popovertargetaction="toggle">Toggle Popover</button> -->
+        <button id="trig">Click</button>
+        <script>
+            document.body.children.trig.addEventListener('click', ()=>{
+                api.childView.trigger()
+            })
+        </script>
     </body>
 </html>

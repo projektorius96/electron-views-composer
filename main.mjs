@@ -35,36 +35,52 @@ app.whenReady().then(() => {
 
     if (parentView) {
         
-        const childView = floatWindow.init(parentView);
-        /* childView.setParentWindow(parentView); */// # if you need decision being made at run-time 
-        childView.loadFile(node_path.join(node_path.resolve(), ...['modules', 'shell', 'gui', 'index.html']))
+        if (navPage){
 
-        ipcMain.handle('action:minimize', ()=>{
-            if (parentView.isMaximized){
-                parentView.minimize()
-            }
-        })
+            const childView = floatWindow.init(parentView);
+            /* childView.setParentWindow(parentView); */// # if you need decision being made at run-time 
+            childView.loadFile(node_path.join(node_path.resolve(), ...['modules', 'shell', 'gui', 'index.html']))
 
-        ipcMain.handle('action:maximize', ()=>{
-            if (parentView.isMinimized){
-                /* parentView.maximize() *//*
-                    > DEV_NOTE # works buggy with `parentView.on('resize')`,..
-                    thus decided to work it around with the following:
-                */
-                parentView.setBounds({
-                    x: 0,
-                    y: 0,
-                    width: workAreaSize.width,
-                    height:  workAreaSize.height,
+            /* navPage.webContents.setDevToolsWebContents(childView.webContents) */
+    
+            if (childView){
+    
+                ipcMain.handle('action:gui', ()=>{
+                    console.log("Hello from floating-window")
                 })
+    
+                childView.webContents.toggleDevTools();
+    
             }
-        })
 
-        ipcMain.handle('action:close', ()=>{
-            if (parentView.isFocused){
-                parentView.close()
-            }
-        })
+            ipcMain.handle('action:minimize', ()=>{
+                if (parentView.isMaximized){
+                    parentView.minimize()
+                }
+            })
+    
+            ipcMain.handle('action:maximize', ()=>{
+                if (parentView.isMinimized){
+                    /* parentView.maximize() *//*
+                        > DEV_NOTE # works buggy with `parentView.on('resize')`,..
+                        thus decided to work it around with the following:
+                    */
+                    parentView.setBounds({
+                        x: 0,
+                        y: 0,
+                        width: workAreaSize.width,
+                        height:  workAreaSize.height,
+                    })
+                }
+            })
+    
+            ipcMain.handle('action:close', ()=>{
+                if (parentView.isFocused){
+                    parentView.close()
+                }
+            })
+
+        }
 
         /**
          * Credits to github:nikwen for putting on the right track 
@@ -98,8 +114,8 @@ app.whenReady().then(() => {
                 height: Number( workAreaSize.height - navPage$workAreaSize.height ),
             });
             
-            /* mainPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['modules', 'canvas', 'index.html'])); */
-            mainPage.webContents.loadURL('http://localhost:5173');
+            mainPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['modules', 'canvas', 'index.html']));
+            /* mainPage.webContents.loadURL('http://localhost:5173'); */
             /* mainPage.webContents.toggleDevTools(); */
         }
 
@@ -108,7 +124,7 @@ app.whenReady().then(() => {
             parentView.on('resize', ()=>{
                 
                 parentView.setBounds({
-                    ...this.getBounds()
+                    ...parentView.getBounds()
                 })
 
                 navPage.setBounds({

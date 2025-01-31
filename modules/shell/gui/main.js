@@ -1,3 +1,5 @@
+import node_path from 'node:path';
+
 import { BrowserWindow as Picture_in_Picture } from "electron";
 
 export default class {
@@ -23,6 +25,8 @@ export default class {
                      * NOTE: This ensures that timers, animations, and JavaScript execution continue at normal speed, even if the window is minimised or out of focus;
                     */
                     backgroundThrottling: false, /* <=== # Prevents Chromium (Electron) from slowing down the window in the background; */
+                    sandbox: false,
+                    preload: node_path.join(import.meta.dirname, ...['preload-child.mjs'])
                 }
             })
         )

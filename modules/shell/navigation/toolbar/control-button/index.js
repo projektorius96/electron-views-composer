@@ -16,11 +16,11 @@ class extends HTMLButtonElement {
 })
 
 const button_minimize = Reflect.construct(customElements.get(__dirname), [RegExp('\u{1F5D5}').source]);
-    button_minimize.addEventListener('click', ()=> __preload__appbarControls.minimize());
+    button_minimize.addEventListener('click', ()=> api.parentView.minimize());
 const button_maximize = Reflect.construct(customElements.get(__dirname), [RegExp('\u{1F5D6}').source]);
-    button_maximize.addEventListener('click', ()=> __preload__appbarControls.maximize());
+    button_maximize.addEventListener('click', ()=> api.parentView.maximize());
 const button_close = Reflect.construct(customElements.get(__dirname), [RegExp('\u{1F5D9}').source]);
-    button_close.addEventListener('click', ()=> __preload__appbarControls.close());
+    button_close.addEventListener('click', ()=> api.parentView.close());
 
 const appbar = document.getElementById('appbar');
 const appbar$css = new CSSStyleSheet()
