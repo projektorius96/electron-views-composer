@@ -3,7 +3,7 @@ import node_path from 'node:path';
 import { app, screen, BaseWindow, WebContentsView, ipcMain } from 'electron';
 /* import { WindowManagement } from './utils/index.mjs'; */// DEV_NOTE # might use in the future...
 
-import floatWindow from './modules/shell/gui/main.mjs';
+import floatWindow from './views/content/secondary/gui/main.mjs';
 
 app.whenReady().then(() => {
 
@@ -28,7 +28,7 @@ app.whenReady().then(() => {
             webPreferences: {
                 /* disableBlinkFeatures: String('SharedAutofill') */// [FAILING]
                 sandbox: false, /* # this allows ESM imports in preload.mjs script file */
-                preload: node_path.join(node_path.resolve(), 'preload.mjs'),
+                preload: node_path.join(node_path.resolve(), ...['views', 'navigation' , 'toolbar', 'preload.mjs']),
             }
         })
         ;
@@ -39,7 +39,7 @@ app.whenReady().then(() => {
 
             const childView = floatWindow.init(parentView);
             /* childView.setParentWindow(parentView); */// # if you need decision being made at run-time 
-            childView.loadFile(node_path.join(node_path.resolve(), ...['modules', 'shell', 'gui', 'index.html']))
+            childView.loadFile(node_path.join(node_path.resolve(), ...['views', 'content', 'secondary', 'gui', 'index.html']))
 
             /* navPage.webContents.setDevToolsWebContents(childView.webContents) */
     
@@ -101,7 +101,7 @@ app.whenReady().then(() => {
                 height: navPage$workAreaSize.height,
             });
 
-            navPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['modules', 'shell', 'navigation', 'toolbar', 'index.html']));
+            navPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['views', 'navigation', 'toolbar', 'index.html']));
             /* navPage.webContents.toggleDevTools(); */
         }
 
@@ -114,7 +114,7 @@ app.whenReady().then(() => {
                 height: Number( workAreaSize.height - navPage$workAreaSize.height ),
             });
             
-            mainPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['modules', 'canvas', 'index.html']));
+            mainPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['views', 'content', 'primary', 'canvas', 'index.html']));
             /* mainPage.webContents.loadURL('http://localhost:5173'); */
             /* mainPage.webContents.toggleDevTools(); */
         }
