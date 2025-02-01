@@ -3,7 +3,7 @@ import node_path from 'node:path';
 import { app, screen, BaseWindow, WebContentsView, ipcMain } from 'electron';
 /* import { WindowManagement } from './utils/index.mjs'; */// DEV_NOTE # might use in the future...
 
-import floatWindow from './modules/shell/gui/main.js';
+import floatWindow from './modules/shell/gui/main.mjs';
 
 app.whenReady().then(() => {
 
@@ -27,8 +27,8 @@ app.whenReady().then(() => {
         navPage = new WebContentsView({
             webPreferences: {
                 /* disableBlinkFeatures: String('SharedAutofill') */// [FAILING]
-                preload: node_path.join(node_path.resolve(), 'preload.mjs'),
                 sandbox: false, /* # this allows ESM imports in preload.mjs script file */
+                preload: node_path.join(node_path.resolve(), 'preload.mjs'),
             }
         })
         ;

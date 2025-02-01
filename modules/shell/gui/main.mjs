@@ -25,8 +25,8 @@ export default class {
                      * NOTE: This ensures that timers, animations, and JavaScript execution continue at normal speed, even if the window is minimised or out of focus;
                     */
                     backgroundThrottling: false, /* <=== # Prevents Chromium (Electron) from slowing down the window in the background; */
-                    sandbox: false,
-                    preload: node_path.join(import.meta.dirname, ...['preload-child.mjs'])
+                    sandbox: false, /* # this allows ESM imports in preload.mjs script file */
+                    preload: node_path.join(import.meta.dirname, ...['preload.mjs'])
                 }
             })
         )
