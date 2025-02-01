@@ -101,7 +101,7 @@ app.whenReady().then(() => {
                 height: navPage$workAreaSize.height,
             });
 
-            navPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['index.html']));
+            navPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['modules', 'shell', 'navigation', 'toolbar', 'index.html']));
             /* navPage.webContents.toggleDevTools(); */
         }
 

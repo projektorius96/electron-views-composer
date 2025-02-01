@@ -1,6 +1,5 @@
-const __dirname = import.meta.url.split('/').at(-2);
-
-customElements.define(__dirname, 
+const control_button = 'control-button';
+customElements.define(control_button, 
 class extends HTMLButtonElement {
     constructor(symbol){
         super()
@@ -15,11 +14,11 @@ class extends HTMLButtonElement {
     extends: 'button'
 })
 
-const button_minimize = Reflect.construct(customElements.get(__dirname), [RegExp('\u{1F5D5}').source]);
+const button_minimize = Reflect.construct(customElements.get(control_button), [RegExp('\u{1F5D5}').source]);
     button_minimize.addEventListener('click', ()=> window.parentView.minimize());
-const button_maximize = Reflect.construct(customElements.get(__dirname), [RegExp('\u{1F5D6}').source]);
+const button_maximize = Reflect.construct(customElements.get(control_button), [RegExp('\u{1F5D6}').source]);
     button_maximize.addEventListener('click', ()=> window.parentView.maximize());
-const button_close = Reflect.construct(customElements.get(__dirname), [RegExp('\u{1F5D9}').source]);
+const button_close = Reflect.construct(customElements.get(control_button), [RegExp('\u{1F5D9}').source]);
     button_close.addEventListener('click', ()=> window.parentView.close());
 
 const appbar = document.getElementById('appbar');
@@ -51,7 +50,7 @@ appbar.append(...[
     button_close,
 ])
 
-export {
-    appbar$css,
+document.adoptedStyleSheets.push(...[
     draggableRegion$css,
-}
+    appbar$css,
+])
