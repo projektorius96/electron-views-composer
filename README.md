@@ -2,6 +2,12 @@
 
 > This is and will be publicly available ongoing (living) project, a multi-window GUI prototype primarily aimed towards [Placard.js-light](https://github.com/projektorius96/Placard.js-light) project I am also actively working on...
 
+### Conventions
+
+- This repository primarily targets JavaScript, not TypeScript users, thus `.mjs` extension deliberately is reserved for ESM-first Electron's main process or Node.js environments
+- Individual `Views` defined under `./views/` path: each path has entry point `index.html` and with it sourced `main.js`, which unlike `main.mjs`, the `main.js` indicates that is part of Document Object Model (DOM) structure under Electron's renderer process.
+- Multiple `Views` defined under `./views/` path can be namespaced in a modular fashion, using `index.mjs` as an entry file;
+
 ### Development process
 
 > Run the following commands on your terminal in ascending order:
