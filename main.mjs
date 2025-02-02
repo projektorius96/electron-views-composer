@@ -12,7 +12,7 @@ app.whenReady().then(() => {
         { workAreaSize } = screen.getPrimaryDisplay()
         ,
         parentView = new BaseWindow({
-            frame: !true,/* DEV_NOTE # iff := false, it disregards `autoHideMenu` no matter what Boolean value it would be assigned to:.. */
+            frame: !true,/* DEV_NOTE # iff := false, it disregards `autoHideMenu` no matter what Boolean value was assigned to it; */
             autoHideMenuBar: true,
             movable: true,
             resizable: !false,
@@ -28,30 +28,30 @@ app.whenReady().then(() => {
             webPreferences: {
                 /* disableBlinkFeatures: String('SharedAutofill') */// [FAILING]
                 sandbox: false, /* # this allows ESM imports in preload.mjs script file */
-                preload: node_path.join(node_path.resolve(), ...['views', 'navigation' , 'toolbar', 'preload.mjs']),
+                preload: node_path.join( node_path.resolve('./views/navigation/toolbar'), 'preload.mjs' ),
             }
         })
         ;
 
     if (parentView) {
-        
+
+        const childView = floatWindow.init(parentView); /* childView.setParentWindow(parentView); */// # alternatively do so, if you need decision being made at run-time
+        childView.loadFile( node_path.join( node_path.resolve('./views/content/secondary/gui'), 'index.html') );
+
+        if (childView){
+            ipcMain.handle('action:gui', ()=>{
+                console.log("Hello from floating-window")
+            })
+            /* childView.webContents.toggleDevTools(); */
+        }
+
         if (navPage){
 
-            const childView = floatWindow.init(parentView);
-            /* childView.setParentWindow(parentView); */// # if you need decision being made at run-time 
-            childView.loadFile(node_path.join(node_path.resolve(), ...['views', 'content', 'secondary', 'gui', 'index.html']))
+            Object.assign(navPage, {
+                height: 40
+            })
 
             /* navPage.webContents.setDevToolsWebContents(childView.webContents) */
-    
-            if (childView){
-    
-                ipcMain.handle('action:gui', ()=>{
-                    console.log("Hello from floating-window")
-                })
-    
-                childView.webContents.toggleDevTools();
-    
-            }
 
             ipcMain.handle('action:minimize', ()=>{
                 if (parentView.isMaximized){
@@ -89,34 +89,32 @@ app.whenReady().then(() => {
         parentView.contentView.addChildView(navPage);
         parentView.contentView.addChildView(mainPage);
 
-        let navPage$workAreaSize = {
-            height: 40
-        }
         if (navPage){
 
             navPage.setBounds({
                 x: 0,
                 y: 0,
                 width: workAreaSize.width,
-                height: navPage$workAreaSize.height,
+                height: navPage.height,
             });
 
-            navPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['views', 'navigation', 'toolbar', 'index.html']));
+            navPage.webContents.loadFile( node_path.join( node_path.resolve('./views/navigation/toolbar'), 'index.html' ) );
             /* navPage.webContents.toggleDevTools(); */
+
         }
 
         if (mainPage){
 
             mainPage.setBounds({
                 x: 0,
-                y: navPage$workAreaSize.height,
+                y: navPage.height,
                 width: workAreaSize.width,
-                height: Number( workAreaSize.height - navPage$workAreaSize.height ),
+                height: Number( workAreaSize.height - navPage.height ),
             });
             
-            mainPage.webContents.loadFile(node_path.join(node_path.resolve(), ...['views', 'content', 'primary', 'canvas', 'index.html']));
-            /* mainPage.webContents.loadURL('http://localhost:5173'); */
+            mainPage.webContents.loadFile( node_path.join( node_path.resolve('views/content/primary/canvas') , 'index.html') );
             /* mainPage.webContents.toggleDevTools(); */
+            
         }
 
         if (navPage && mainPage){
@@ -125,20 +123,20 @@ app.whenReady().then(() => {
                 
                 parentView.setBounds({
                     ...parentView.getBounds()
-                })
+                });
 
                 navPage.setBounds({
                     x: 0,
                     y: 0,
                     width: parentView.getBounds().width,
-                    height: navPage$workAreaSize.height,
+                    height: navPage.height,
                 });
 
                 mainPage.setBounds({
                     x: 0,
-                    y: navPage$workAreaSize.height,
+                    y: navPage.height,
                     width: parentView.getBounds().width,
-                    height: Number( /* workAreaSize.height */parentView.getBounds().height - navPage$workAreaSize.height ),
+                    height: Number( /* workAreaSize.height */parentView.getBounds().height - navPage.height ),
                 });
                 
             })

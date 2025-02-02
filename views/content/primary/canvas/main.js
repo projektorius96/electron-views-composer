@@ -2,9 +2,6 @@ import UserSettings from './user-settings.js';
 import Placard from './src/index.js';
 import setViews from './implementation/index.js';
 
-console.log(document.body.main);
-
-
 const 
         { Stage, Layer } = Placard.ViewGroup
         ,
