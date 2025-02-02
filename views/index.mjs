@@ -1,8 +1,6 @@
 import node_path from 'node:path';
 import { screen, BaseWindow, WebContentsView, ipcMain } from 'electron';
 
-import floatingWindow from './content/secondary/gui/main.mjs'
-
 export default function(){
 
     const
@@ -33,23 +31,11 @@ export default function(){
 
     if (parentView) {
 
-        const childView = floatingWindow.init(parentView); /* childView.setParentWindow(parentView); */// # alternatively do so, if you need decision being made at run-time
-        childView.loadFile( node_path.join( node_path.resolve('./views/content/secondary/gui'), 'index.html') );
-
-        if (childView){
-            ipcMain.handle('action:gui', ()=>{
-                console.log("Hello from floating-window")
-            })
-            /* childView.webContents.toggleDevTools(); */
-        }
-
         if (navPage){
 
             Object.assign(navPage, {
                 height: 40
             })
-
-            /* navPage.webContents.setDevToolsWebContents(childView.webContents) */
 
             ipcMain.handle('action:minimize', ()=>{
                 if (parentView.isMaximized){
@@ -134,7 +120,7 @@ export default function(){
                     x: 0,
                     y: navPage.height,
                     width: parentView.getBounds().width,
-                    height: Number( /* workAreaSize.height */parentView.getBounds().height - navPage.height ),
+                    height: Number( parentView.getBounds().height - navPage.height ),
                 });
                 
             })
