@@ -40,7 +40,7 @@ export default function(){
             ipcMain.handle('action:gui', ()=>{
                 console.log("Hello from floating-window")
             })
-            /* childView.webContents.toggleDevTools(); */
+            childView.webContents.toggleDevTools();
         }
 
         if (navPage){

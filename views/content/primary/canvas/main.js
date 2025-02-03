@@ -11,7 +11,7 @@ const
             stage.add([
                 new Layer({ name: 'grid', opacity: 0.25 })
                 ,
-                new Layer({name: 'wireframe', hidden: !true})
+                new Layer({name: 'wireframe', hidden: true})
                 ,
             ]);
         }

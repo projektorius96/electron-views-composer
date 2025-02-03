@@ -7,8 +7,11 @@ export default class {
         return (
             new Picture_in_Picture({
                 parent,
+                x: 100,
+                y: 100,
                 width: 400,
                 height: 300,
+                title: 'GUI',
                 alwaysOnTop: true,
                 frame: !false,
                 autoHideMenuBar: true,
@@ -18,7 +21,7 @@ export default class {
                 minimizable: false,
                 maximizable: false,
                 /* transparent: true, */
-                /* hasShadow: false, */
+                /* hasShadow: !false, */
                 webPreferences: {
                     /** 
                      * NOTE: This ensures that timers, animations, and JavaScript execution continue at normal speed, even if the window is minimised or out of focus;
