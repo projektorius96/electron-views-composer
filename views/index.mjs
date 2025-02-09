@@ -1,7 +1,12 @@
 import node_path from 'node:path';
+import node_fs from 'node:fs';
 import { screen, BaseWindow, WebContentsView, ipcMain, webContents } from 'electron';
 
 import floatingWindow from './content/secondary/gui/main.mjs'
+
+const globalLayout = node_fs.readFileSync(node_path.join(import.meta.dirname, 'global-layout.js'), {
+    encoding: 'utf-8'
+});
 
 export default function(){
 
@@ -119,12 +124,10 @@ export default function(){
 
         if (navPage && mainPage){
 
-            /* DEV_PROPOSAL # inject common HTML layout in the following way:..  */
             webContents.getAllWebContents().forEach((wcView)=>{
 
-                wcView.executeJavaScript(`
-                    /*  === shared instance of HTMLTemplateElement among all webContents (i.e. global Layout) ===  */
-                `)
+                /* wcView.openDevTools() */// # [PASSING]
+                wcView.executeJavaScript(globalLayout);
 
             })
 
