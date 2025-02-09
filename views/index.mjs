@@ -1,5 +1,5 @@
 import node_path from 'node:path';
-import { screen, BaseWindow, WebContentsView, ipcMain } from 'electron';
+import { screen, BaseWindow, WebContentsView, ipcMain, webContents } from 'electron';
 
 import floatingWindow from './content/secondary/gui/main.mjs'
 
@@ -36,11 +36,13 @@ export default function(){
         const childView = floatingWindow.init(parentView); /* childView.setParentWindow(parentView); */// # alternatively do so, if you need decision being made at run-time
         childView.loadFile( node_path.join( node_path.resolve('./views/content/secondary/gui'), 'index.html') );
 
-        if (childView){
+        if (childView) {
+
             ipcMain.handle('action:gui', ()=>{
                 console.log("Hello from floating-window")
             })
             /* childView.webContents.toggleDevTools(); */
+
         }
 
         if (navPage){
@@ -117,6 +119,15 @@ export default function(){
 
         if (navPage && mainPage){
 
+            /* DEV_PROPOSAL # inject common HTML layout in the following way:..  */
+            webContents.getAllWebContents().forEach((wcView)=>{
+
+                wcView.executeJavaScript(`
+                    /*  === shared instance of HTMLTemplateElement among all webContents (i.e. global Layout) ===  */
+                `)
+
+            })
+
             parentView.on('resize', ()=>{
                 
                 parentView.setBounds({
@@ -149,6 +160,8 @@ export default function(){
             navPage.webContents.close();
             mainPage.webContents.close();
         });
+
+        
 
     }
     
