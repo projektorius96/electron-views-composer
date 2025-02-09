@@ -31,7 +31,7 @@ export default function(){
             webPreferences: {
                 /* disableBlinkFeatures: String('SharedAutofill') */// [FAILING]
                 sandbox: false, /* # this allows ESM imports in preload.mjs script file */
-                preload: node_path.join( node_path.resolve('./views/navigation/toolbar'), 'preload.mjs' ),
+                preload: node_path.join( node_path.resolve('./views/navigation/appbar'), 'preload.mjs' ),
             }
         })
         ;
@@ -43,10 +43,12 @@ export default function(){
 
         if (childView) {
 
-            ipcMain.handle('action:gui', ()=>{
-                console.log("Hello from floating-window")
-            })
-            /* childView.webContents.toggleDevTools(); */
+            childView.webContents.on('did-finish-load', ()=>{
+                childView.webContents.executeJavaScriptInIsolatedWorld(1, [{code: `
+                    let appbar = document.getElementById('appbar');
+                    appbar.style.height = 'auto';
+                `.trim()}]);
+            });
 
         }
 
@@ -55,8 +57,6 @@ export default function(){
             Object.assign(navPage, {
                 height: 40
             })
-
-            /* navPage.webContents.setDevToolsWebContents(childView.webContents) */
 
             ipcMain.handle('action:minimize', ()=>{
                 if (parentView.isMaximized){
@@ -103,8 +103,7 @@ export default function(){
                 height: navPage.height,
             });
 
-            navPage.webContents.loadFile( node_path.join( node_path.resolve('./views/navigation/toolbar'), 'index.html' ) );
-            /* navPage.webContents.toggleDevTools(); */
+            navPage.webContents.loadFile( node_path.join( node_path.resolve('./views/navigation/appbar'), 'index.html' ) );
 
         }
 
@@ -126,10 +125,10 @@ export default function(){
 
             webContents.getAllWebContents().forEach((wcView)=>{
 
-                /* wcView.openDevTools() */// # [PASSING]
+                wcView.openDevTools()// # [PASSING]
                 wcView.executeJavaScript(globalLayout);
 
-            })
+            });
 
             parentView.on('resize', ()=>{
                 
