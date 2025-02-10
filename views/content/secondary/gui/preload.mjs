@@ -1,8 +1,8 @@
 import { contextBridge, ipcRenderer } from "electron";
 
-import { appbarInterface } from "../../../navigation/appbar/preload.mjs";
-
-contextBridge.exposeInMainWorld(`childView`, {
-    ...appbarInterface,
+contextBridge.exposeInMainWorld(`navigation_appbar`, {
     trigger: async ()=> await ipcRenderer.invoke(`action:gui`)
+    ,
+    /** @implements */
+    close: async ()=> await ipcRenderer.invoke('action:close'),
 });

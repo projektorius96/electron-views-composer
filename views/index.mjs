@@ -46,7 +46,9 @@ export default function(){
             childView.webContents.on('did-finish-load', ()=>{
                 childView.webContents.executeJavaScriptInIsolatedWorld(1, [{code: `
                     let appbar = document.getElementById('appbar');
-                    appbar.style.height = 'auto';
+                        appbar.style.height = 'auto';
+                    appbar.children.button_minimize.style.display = 'none';
+                    appbar.children.button_maximize.style.display = 'none';
                 `.trim()}]);
             });
 
@@ -80,8 +82,8 @@ export default function(){
             })
     
             ipcMain.handle('action:close', ()=>{
-                if (parentView.isFocused){
-                    parentView.close()
+                if (parentView.isFocused() || childView.isFocused()){
+                    parentView.close();
                 }
             })
 
@@ -125,7 +127,7 @@ export default function(){
 
             webContents.getAllWebContents().forEach((wcView)=>{
 
-                wcView.openDevTools()// # [PASSING]
+                wcView.openDevTools();// # [PASSING]
                 wcView.executeJavaScript(globalLayout);
 
             });
