@@ -1,7 +1,12 @@
 import node_path from 'node:path';
-import { screen, BaseWindow, WebContentsView, ipcMain } from 'electron';
+import node_fs from 'node:fs';
+import { screen, BaseWindow, WebContentsView, ipcMain, webContents } from 'electron';
 
 import floatingWindow from './content/secondary/gui/main.mjs'
+
+const globalLayout = node_fs.readFileSync(node_path.join(import.meta.dirname, 'global-layout.js'), {
+    encoding: 'utf-8'
+});
 
 export default function(){
 
@@ -26,7 +31,7 @@ export default function(){
             webPreferences: {
                 /* disableBlinkFeatures: String('SharedAutofill') */// [FAILING]
                 sandbox: false, /* # this allows ESM imports in preload.mjs script file */
-                preload: node_path.join( node_path.resolve('./views/navigation/toolbar'), 'preload.mjs' ),
+                preload: node_path.join( node_path.resolve('./views/navigation/appbar'), 'preload.mjs' ),
             }
         })
         ;
@@ -36,11 +41,17 @@ export default function(){
         const childView = floatingWindow.init(parentView); /* childView.setParentWindow(parentView); */// # alternatively do so, if you need decision being made at run-time
         childView.loadFile( node_path.join( node_path.resolve('./views/content/secondary/gui'), 'index.html') );
 
-        if (childView){
-            ipcMain.handle('action:gui', ()=>{
-                console.log("Hello from floating-window")
-            })
-            /* childView.webContents.toggleDevTools(); */
+        if (childView) {
+
+            childView.webContents.on('did-finish-load', ()=>{
+                childView.webContents.executeJavaScriptInIsolatedWorld(1, [{code: `
+                    let appbar = document.getElementById('appbar');
+                        appbar.style.height = 'auto';
+                    appbar.children.button_minimize.style.display = 'none';
+                    appbar.children.button_maximize.style.display = 'none';
+                `.trim()}]);
+            });
+
         }
 
         if (navPage){
@@ -48,8 +59,6 @@ export default function(){
             Object.assign(navPage, {
                 height: 40
             })
-
-            /* navPage.webContents.setDevToolsWebContents(childView.webContents) */
 
             ipcMain.handle('action:minimize', ()=>{
                 if (parentView.isMaximized){
@@ -73,9 +82,8 @@ export default function(){
             })
     
             ipcMain.handle('action:close', ()=>{
-                if (parentView.isFocused){
-                    parentView.close()
-                }
+                if ( parentView.isFocused() ) parentView.close() ;
+                if ( childView.isFocused() )  childView.close()  ;
             })
 
         }
@@ -96,8 +104,7 @@ export default function(){
                 height: navPage.height,
             });
 
-            navPage.webContents.loadFile( node_path.join( node_path.resolve('./views/navigation/toolbar'), 'index.html' ) );
-            /* navPage.webContents.toggleDevTools(); */
+            navPage.webContents.loadFile( node_path.join( node_path.resolve('./views/navigation/appbar'), 'index.html' ) );
 
         }
 
@@ -116,6 +123,13 @@ export default function(){
         }
 
         if (navPage && mainPage){
+
+            webContents.getAllWebContents().forEach((wcView)=>{
+
+                /* wcView.openDevTools(); */// # [PASSING]
+                wcView.executeJavaScript(globalLayout);
+
+            });
 
             parentView.on('resize', ()=>{
                 
@@ -149,6 +163,8 @@ export default function(){
             navPage.webContents.close();
             mainPage.webContents.close();
         });
+
+        
 
     }
     

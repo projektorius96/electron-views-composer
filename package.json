@@ -6,10 +6,9 @@
   "license": "ISC",
   "description": "Initially this repo targets my personal ongoing project 'placard.js-light', but can be used for any relevant web-to-electron application",
   "devDependencies": {
-    "electron": "^34.0.1"
-  }
-  ,
+    "electron": "^34.2.0"
+  },
   "scripts": {
-    "start" : "nodemon --exec npx electron main.mjs"
+    "start": "nodemon --exec npx electron main.mjs"
   }
 }

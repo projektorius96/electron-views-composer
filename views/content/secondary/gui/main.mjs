@@ -9,8 +9,7 @@ export default class {
                 parent,
                 width: 400,
                 height: 300,
-                alwaysOnTop: true,
-                frame: !false,
+                frame: !true,/* DEV_NOTE # iff := false, it disregards `autoHideMenu` no matter what Boolean value was assigned to it; */
                 autoHideMenuBar: true,
                 resizable: true,
                 movable: true,
