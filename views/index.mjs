@@ -82,9 +82,8 @@ export default function(){
             })
     
             ipcMain.handle('action:close', ()=>{
-                if (parentView.isFocused() || childView.isFocused()){
-                    parentView.close();
-                }
+                if ( parentView.isFocused() ) parentView.close() ;
+                if ( childView.isFocused() )  childView.close()  ;
             })
 
         }
@@ -127,7 +126,7 @@ export default function(){
 
             webContents.getAllWebContents().forEach((wcView)=>{
 
-                wcView.openDevTools();// # [PASSING]
+                /* wcView.openDevTools(); */// # [PASSING]
                 wcView.executeJavaScript(globalLayout);
 
             });
