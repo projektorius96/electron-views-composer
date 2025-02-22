@@ -83,7 +83,7 @@ export default function(){
     
             ipcMain.handle('action:close', ()=>{
                 if ( parentView.isFocused() ) parentView.close() ;
-                if ( childView.isFocused() )  childView.close()  ;
+                if ( !parentView.isDestroyed() && childView.isFocused() ) childView.close() ;
             })
 
         }
