@@ -1,12 +1,11 @@
-import node_path from 'node:path';
-import node_fs from 'node:fs';
-import { screen, BaseWindow, WebContentsView, ipcMain, webContents } from 'electron';
+/* === ES6 module imports === */
+    import { screen, BaseWindow, WebContentsView, ipcMain, webContents } from 'electron';
+    import floatingWindow from './content/secondary/gui/main.mjs';
+/* === ES6 module imports === */
 
-import floatingWindow from './content/secondary/gui/main.mjs'
-
-const globalLayout = node_fs.readFileSync(node_path.join(import.meta.dirname, 'global-layout.js'), {
-    encoding: 'utf-8'
-});
+/* === Node.js file-system based imports === */
+    import { node_path, importFileModule } from '../utils/index.node.mjs';
+/* === Node.js file-system based imports === */
 
 export default function(){
 
@@ -127,7 +126,9 @@ export default function(){
             webContents.getAllWebContents().forEach((wcView)=>{
 
                 /* wcView.openDevTools(); */// # [PASSING]
-                wcView.executeJavaScript(globalLayout);
+                wcView.executeJavaScript(
+                    importFileModule(import.meta.dirname, [`global-layout.js`])
+                );
 
             });
 
