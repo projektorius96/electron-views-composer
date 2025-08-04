@@ -117,7 +117,7 @@ export default function(){
             });
             
             mainPage.webContents.loadFile( node_path.join( node_path.resolve('./views/content/primary/canvas') , 'index.html') );
-            mainPage.webContents.toggleDevTools();
+            /* mainPage.webContents.toggleDevTools(); */
 
         }
 
@@ -164,8 +164,6 @@ export default function(){
             navPage.webContents.close();
             mainPage.webContents.close();
         });
-
-        
 
     }
     
