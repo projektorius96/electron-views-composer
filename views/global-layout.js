@@ -1,5 +1,4 @@
 /* === */
-
 customElements.define('global-layout', class extends HTMLElement {
 
     connectedCallback(){
@@ -9,7 +8,7 @@ customElements.define('global-layout', class extends HTMLElement {
         this.appendChild(nav);
     }
 
-})
+});
 
 if (document){
     document.body.appendChild(
