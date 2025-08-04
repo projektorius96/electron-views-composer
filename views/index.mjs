@@ -116,8 +116,8 @@ export default function(){
                 height: Number( workAreaSize.height - navPage.height ),
             });
             
-            mainPage.webContents.loadFile( node_path.join( node_path.resolve('views/content/primary/canvas') , 'index.html') );
-            /* mainPage.webContents.toggleDevTools(); */
+            mainPage.webContents.loadFile( node_path.join( node_path.resolve('./views/content/primary/canvas') , 'index.html') );
+            mainPage.webContents.toggleDevTools();
 
         }
 

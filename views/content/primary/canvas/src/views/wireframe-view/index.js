@@ -1,31 +1,19 @@
-export default class {
-
-    static ENUMS = {
-        TYPE: {
-            ident(){},
-            reversed_ident(){},
-        }
-    }
-
-    static {
-        Object.freeze(this.ENUMS.TYPE)
-    }
+export class wireframe_view {
 
     /**
      * The `default.draw` static method takes single `Object` as its input whose properties are as follows:
-     * @param {HTMLCanvasElement} canvas - a reference to `canvas` (_a.k.a. Layer_) instance whose context in turn will be modified;
-     * @param {Object} options - options you have passed to shape's current `context` of the `canvas`
-     * @returns {Boolean} `true`
+     * @param {CanvasRenderingContext2D} `canvas` - a reference to `canvas` (_a.k.a. "Layer"_);
+     * @param {Object} `options` - options you have passed to shape's current `context` of the current `canvas` reference;
+     * @returns `context` - the modified `context` with a `wireframe` view "painted" on the `<canvas>` hosted bitmap.
     */
-    static draw({canvas, options}){
+    static draw({context, options, ENUMS}){
 
-        const context = canvas.getContext('2d');
         switch (options.type) {
             // DEV_NOTE (!) # .value is an alias for .name (@see ./src/utils.js)
-            case this.ENUMS.TYPE.ident.value:
+            case ENUMS.CASE.ident:
                 this.#identDiagonal({context, options});
                 break;
-            case this.ENUMS.TYPE.reversed_ident.value:
+            case ENUMS.CASE.reversed_ident:
                 this.#reversedDiagonal({context, options});
                 break;
         }
@@ -48,8 +36,8 @@ export default class {
             );
         context.closePath();
 
-        context.lineWidth = options?.lineWidth || context.global.options.lineWidth;
-        context.strokeStyle = options?.strokeStyle || context.global.options.strokeStyle;
+        context.lineWidth = options?.lineWidth || 1;
+        context.strokeStyle = options?.strokeStyle || 1;
         context.fillStroke();
     }
 
@@ -67,8 +55,8 @@ export default class {
             );
         context.closePath();
 
-        context.lineWidth = options?.lineWidth || context.global.options.lineWidth;
-        context.strokeStyle = options?.strokeStyle || context.global.options.strokeStyle;
+        context.lineWidth = options?.lineWidth || 1;
+        context.strokeStyle = options?.strokeStyle || 1;
         context.fillStroke();
     }
 

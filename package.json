@@ -4,9 +4,9 @@
   "type": "module",
   "author": "github@projektorius96",
   "license": "ISC",
-  "description": "Initially this repo targets my personal ongoing project 'placard.js-light', but can be used for any relevant web-to-electron application",
+  "description": "",
   "devDependencies": {
-    "electron": "^34.2.0"
+    "electron": "^37.2.5"
   },
   "scripts": {
     "start": "nodemon --exec npx electron main.mjs"
