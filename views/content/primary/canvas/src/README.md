@@ -1,0 +1,1 @@
+> **BE ADVISED**: This is a hard-coded version, and may differ from working tip of [Vekt.js-light](https://github.com/projektorius96/Vekt.js-light/tree/main)

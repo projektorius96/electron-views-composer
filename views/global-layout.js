@@ -1,4 +1,4 @@
-/* === */
+/* DEV_NOTE # For syntax highlighting extension in VSC, credits to id:tobermory.es6-string-html (user:Tobermory) */
 customElements.define('global-layout', class extends HTMLElement {
 
     connectedCallback(){
@@ -46,7 +46,7 @@ const button_close = Reflect.construct(customElements.get(control_button), [RegE
 
 const appbar = document.getElementById('appbar');
 const appbar$css = new CSSStyleSheet()
-    appbar$css.insertRule(/* style */`
+    appbar$css.insertRule(/* css */`
         #${appbar.id} {
             height: 100vh;
             width: 100%;
@@ -55,13 +55,13 @@ const appbar$css = new CSSStyleSheet()
             background-color:rgb(230, 230, 230);
         }
     `.trim());
-    appbar$css.insertRule(/* style */`
+    appbar$css.insertRule(/* css */`
         #${appbar.id} > button {
             border: unset;
             background-color: inherit;
         }
     `.trim());
-    appbar$css.insertRule(/* style */`
+    appbar$css.insertRule(/* css */`
         #${appbar.id} > button:hover {
             background-color:rgb(200, 200, 200);
         }
@@ -69,7 +69,7 @@ const appbar$css = new CSSStyleSheet()
 
 const draggableRegion$css = new CSSStyleSheet();
     draggableRegion$css.insertRule(
-    /* style */`
+    /* css */`
             nav {
                 -webkit-app-region: drag;
                 & > button {
