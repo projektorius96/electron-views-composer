@@ -1,11 +1,11 @@
 import node_path from 'node:path';
-import { BrowserWindow as Picture_in_Picture } from "electron";
+import { BrowserWindow as PictureInPicture, app} from "electron";
 
 export default class {
 
     static init(parent = null){
         return (
-            new Picture_in_Picture({
+            new PictureInPicture({
                 parent,
                 width: 400,
                 height: 300,
@@ -24,7 +24,8 @@ export default class {
                     */
                     backgroundThrottling: false, /* <=== # Prevents Chromium (Electron) from slowing down the window in the background; */
                     sandbox: false, /* # this allows ESM imports in preload.mjs script file */
-                    preload: node_path.join( node_path.resolve( import.meta.dirname ), 'preload.mjs' )
+                    preload: node_path.join( node_path.resolve( import.meta.dirname ), 'preload.mjs' ),
+                    devTools: !app.isPackaged
                 }
             })
         )

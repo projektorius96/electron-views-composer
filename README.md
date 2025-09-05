@@ -1,12 +1,11 @@
 # Project name: electron-views-composer
 
-> This is and will be publicly available ongoing (living) project, a multi-window GUI prototype primarily aimed towards [Placard.js-light](https://github.com/projektorius96/Placard.js-light) project I am also actively working on...
+> This is and will be publicly available ongoing (living) project, a multi-window GUI prototype primarily aimed towards [Vekt.js-light](https://github.com/projektorius96/Vekt.js-light) project I also do maintain...
 
 ### Conventions
 
-- This repository primarily targets JavaScript, not TypeScript users, thus `.mjs` extension deliberately is reserved for ESM-first Electron's main process or Node.js environments
-- Individual `Views` defined under `./views/` path: each path has entry point `index.html` and with it sourced `main.js`, which unlike `main.mjs`, the `main.js` indicates that is part of Document Object Model (DOM) structure under Electron's renderer process.
-- Multiple `Views` defined under `./views/` path can be namespaced in a modular fashion, using `index.mjs` as an entry file;
+- This repository primarily targets JavaScript, not TypeScript users, thus `.mjs` extension deliberately is reserved for ESM-first Electron's main process or Node.js environments, respectively.
+- The `Views` defined under `./views/` path: each path has entry point `index.html` linked with sourced `main.js` within its `index.html` counterpart, which unlike `main.mjs`, the `main.js` indicates that is part of Document Object Model (DOM) structure under Electron's renderer process, rather than the part of Electron's main process or so...
 
 ### Development process
 
@@ -15,11 +14,13 @@
 1. `npm ci`;
 2. `npm start` instead of a long `nodemon --exec npx electron main.mjs` command.
 
-> **Dev advice**: If you have [nodemon](https://www.npmjs.com/package/nodemon) installed on your system globally, simply run `nodemon --exec npx electron main.mjs`: _the entry file name_ (e.g. _main.mjs_) may vary tho, so beware...
+### Remarks
 
-### Dev experience
+> Make sure your top-level DOM element for each `View` instance has its own `style.height` property set to `height:100vh` - this will allow adjacent `Views` to be stacked in a nice one-to-one manner without any visual gaps experienced !
 
-> **IMPORTANT**: Make sure your top-level DOM element for each View has its `style.height` property set as `height:100vh` - this will allow adjacent `Views` to be stacked in a nice one-to-one manner without any visual gaps !
+### Known Electron issues
+
+- [Request Autofill.enable failed](https://github.com/electron/electron/issues/41614)(UNSOLVED)
 
 ---
 

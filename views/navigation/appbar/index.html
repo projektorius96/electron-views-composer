@@ -7,14 +7,14 @@
     <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
     <title></title>
     <style>
-        body, body * {
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
             margin: 0px;
             padding: 0px;
-            box-sizing: border-box;
-            overflow: hidden;
         }
     </style>
-    <!-- <script type="module" src="./main.js" defer></script> -->
 </head>
     <body>
         <!-- <nav id="appbar"></nav> -->

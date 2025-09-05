@@ -1,5 +1,5 @@
 /* === ES6 module imports === */
-    import { screen, BaseWindow, WebContentsView, ipcMain, webContents } from 'electron';
+    import { app, screen, BaseWindow, WebContentsView, ipcMain, webContents, globalShortcut } from 'electron';
     import floatingWindow from './content/secondary/gui/main.mjs';
 /* === ES6 module imports === */
 
@@ -7,7 +7,7 @@
     import { node_path, importFileModule } from '../utils/index.node.mjs';
 /* === Node.js file-system based imports === */
 
-export default function(){
+export default function() {
 
     const
         /* DEV_NOTE # Essentially, workAreaSize is same as WindowManagement.screenArea utility method, except that the utility does not return you {x, y} pair: */
@@ -24,11 +24,15 @@ export default function(){
             height:  workAreaSize.height,
         })
         ,
-        mainPage = new WebContentsView({})
+        mainPage = new WebContentsView({
+            webPreferences: {
+                devTools: !app.isPackaged
+            }
+        })
         ,
         navPage = new WebContentsView({
             webPreferences: {
-                /* disableBlinkFeatures: String('SharedAutofill') */// [FAILING]
+                /* disableBlinkFeatures: String('SharedAutofill'), */// [FAILING]
                 sandbox: false, /* # this allows ESM imports in preload.mjs script file */
                 preload: node_path.join( node_path.resolve('./views/navigation/appbar'), 'preload.mjs' ),
             }
@@ -43,7 +47,8 @@ export default function(){
         if (childView) {
 
             childView.webContents.on('did-finish-load', ()=>{
-                childView.webContents.executeJavaScriptInIsolatedWorld(1, [{code: `
+                /* DEV_NOTE # For syntax highlighting extension in VSC, credits to id:tobermory.es6-string-html (user:Tobermory) */
+                childView.webContents.executeJavaScriptInIsolatedWorld(1, [{code: /* js */`
                     let appbar = document.getElementById('appbar');
                         appbar.style.height = 'auto';
                     appbar.children.button_minimize.style.display = 'none';
@@ -53,7 +58,7 @@ export default function(){
 
         }
 
-        if (navPage){
+        if (navPage) {
 
             Object.assign(navPage, {
                 height: 40
@@ -117,11 +122,36 @@ export default function(){
             });
             
             mainPage.webContents.loadFile( node_path.join( node_path.resolve('./views/content/primary/canvas') , 'index.html') );
-            /* mainPage.webContents.toggleDevTools(); */
+           /*  mainPage.webContents.toggleDevTools(); */
 
         }
 
-        if (navPage && mainPage){
+        if (navPage && mainPage) {
+
+            globalShortcut.register('CommandOrControl+Shift+I', () => {
+                // if (mainPage.webContents.isFocused()) {
+                //     mainPage.webContents.toggleDevTools();
+                // }
+                switch (true) {
+                    case ( mainPage.webContents.isFocused() ) :
+                        mainPage.webContents.toggleDevTools();
+                    break;
+                    case ( childView.webContents.isFocused() ) :
+                        childView.webContents.toggleDevTools();
+                    break;
+                }
+            });
+
+            /**
+             * @win32
+             * @linux
+             * @darwin
+             */
+            app.on('before-quit', () => {
+                // Unregister all shortcuts to clean up resources
+                globalShortcut.unregisterAll();
+            });
+
 
             webContents.getAllWebContents().forEach((wcView)=>{
 
@@ -152,7 +182,7 @@ export default function(){
                     height: Number( /* workAreaSize.height */parentView.getBounds().height - navPage.height ),
                 });
                 
-            })
+            });
 
         }
 
@@ -163,6 +193,10 @@ export default function(){
         parentView.on('closed', () => {
             navPage.webContents.close();
             mainPage.webContents.close();
+        });
+
+        childView.on('closed', () => {
+            mainPage.webContents.focus();
         });
 
     }

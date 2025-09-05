@@ -10,7 +10,7 @@ export
                 layers: {
                     grid: {
                         id: ENUMS.CASE.grid,
-                        strokeStyle: ENUMS.COLOR.black,
+                        strokeStyle: ENUMS.COLOR.magenta,
                         hidden: !true,
                         dotted: !true,
                         lineWidth: 1,
@@ -20,9 +20,9 @@ export
                     wireframe: {
                         id: ENUMS.CASE.wireframe,
                         strokeStyle: ENUMS.COLOR.black,
-                        hidden: !true,
+                        hidden: /* ! */true,
                         lineWidth: 1,
-                        opacity: 0.25
+                        opacity: 1
                     }
                     ,
                 }
