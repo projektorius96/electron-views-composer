@@ -1,205 +1,159 @@
-/* === ES6 module imports === */
-    import { app, screen, BaseWindow, WebContentsView, ipcMain, webContents, globalShortcut } from 'electron';
-    import floatingWindow from './content/secondary/gui/main.mjs';
-/* === ES6 module imports === */
+import { app, screen, BaseWindow, WebContentsView, ipcMain, webContents, globalShortcut } from 'electron';
+import { viewPath, importFileModule } from '../utils/index.node.mjs';
+import { FRAMELESS_OPTIONS } from './_shared/window-options.mjs';
+import floatingWindow from './content/secondary/gui/main.mjs';
 
-/* === Node.js file-system based imports === */
-    import { node_path, importFileModule } from '../utils/index.node.mjs';
-/* === Node.js file-system based imports === */
+export default function initViewsComposition() {
+  const { workAreaSize } = screen.getPrimaryDisplay();
 
-export default function() {
+  const parentView = createParentView(workAreaSize);
+  if (!parentView) return;
 
-    const
-        /* DEV_NOTE # Essentially, workAreaSize is same as WindowManagement.screenArea utility method, except that the utility does not return you {x, y} pair: */
-        { workAreaSize } = screen.getPrimaryDisplay()
-        ,
-        parentView = new BaseWindow({
-            frame: !true,/* DEV_NOTE # iff := false, it disregards `autoHideMenu` no matter what Boolean value was assigned to it; */
-            autoHideMenuBar: true,
-            movable: true,
-            resizable: !false,
-            x: 0,
-            y: 0,
-            width: workAreaSize.width,
-            height:  workAreaSize.height,
-        })
-        ,
-        mainPage = new WebContentsView({
-            webPreferences: {
-                devTools: !app.isPackaged
-            }
-        })
-        ,
-        navPage = new WebContentsView({
-            webPreferences: {
-                /* disableBlinkFeatures: String('SharedAutofill'), */// [FAILING]
-                sandbox: false, /* # this allows ESM imports in preload.mjs script file */
-                preload: node_path.join( node_path.resolve('./views/navigation/appbar'), 'preload.mjs' ),
-            }
-        })
-        ;
+  const mainPage = createMainPage();
+  const navPage = createNavPage();
+  const childView = createChildView(parentView);
 
-    if (parentView) {
+  setupIpcHandlers(ipcMain, parentView, childView, navPage, workAreaSize);
 
-        const childView = floatingWindow.init(parentView); /* childView.setParentWindow(parentView); */// # alternatively do so, if you need decision being made at run-time
-        childView.loadFile( node_path.join( node_path.resolve('./views/content/secondary/gui'), 'index.html') );
+  addViewsToParent(parentView, navPage, mainPage);
 
-        if (childView) {
+  if (navPage) {
+    setNavPageBounds(navPage, workAreaSize);
+    navPage.webContents.loadFile(viewPath('navigation', 'appbar', 'index.html'));
+  }
 
-            childView.webContents.on('did-finish-load', ()=>{
-                /* DEV_NOTE # For syntax highlighting extension in VSC, credits to id:tobermory.es6-string-html (user:Tobermory) */
-                childView.webContents.executeJavaScriptInIsolatedWorld(1, [{code: /* js */`
-                    let appbar = document.getElementById('appbar');
-                        appbar.style.height = 'auto';
-                    appbar.children.button_minimize.style.display = 'none';
-                    appbar.children.button_maximize.style.display = 'none';
-                `.trim()}]);
-            });
+  if (mainPage) {
+    setMainPageBounds(mainPage, navPage, workAreaSize);
+    mainPage.webContents.loadFile(viewPath('content', 'primary', 'canvas', 'index.html'));
+  }
 
-        }
+  if (navPage && mainPage) {
+    registerGlobalShortcuts(mainPage, childView);
+    app.on('before-quit', () => globalShortcut.unregisterAll());
+    injectGlobalLayout();
+    subscribeResize(parentView, navPage, mainPage);
+  }
 
-        if (navPage) {
-
-            Object.assign(navPage, {
-                height: 40
-            })
-
-            ipcMain.handle('action:minimize', ()=>{
-                if (parentView.isMaximized){
-                    parentView.minimize()
-                }
-            })
-    
-            ipcMain.handle('action:maximize', ()=>{
-                if (parentView.isMinimized){
-                    /* parentView.maximize() *//*
-                        > DEV_NOTE # works buggy with `parentView.on('resize')`,..
-                        thus decided to work it around with the following:
-                    */
-                    parentView.setBounds({
-                        x: 0,
-                        y: 0,
-                        width: workAreaSize.width,
-                        height:  workAreaSize.height,
-                    })
-                }
-            })
-    
-            ipcMain.handle('action:close', ()=>{
-                if ( parentView.isFocused() ) parentView.close() ;
-                if ( !parentView.isDestroyed() && childView.isFocused() ) childView.close() ;
-            })
-
-        }
-
-        /**
-         * Credits to github:nikwen for putting on the right track 
-         * @see {@link https://github.com/electron/electron/issues/45367#issuecomment-2620264791}
-         */
-        parentView.contentView.addChildView(navPage);
-        parentView.contentView.addChildView(mainPage);
-
-        if (navPage){
-
-            navPage.setBounds({
-                x: 0,
-                y: 0,
-                width: workAreaSize.width,
-                height: navPage.height,
-            });
-
-            navPage.webContents.loadFile( node_path.join( node_path.resolve('./views/navigation/appbar'), 'index.html' ) );
-
-        }
-
-        if (mainPage){
-
-            mainPage.setBounds({
-                x: 0,
-                y: navPage.height,
-                width: workAreaSize.width,
-                height: Number( workAreaSize.height - navPage.height ),
-            });
-            
-            mainPage.webContents.loadFile( node_path.join( node_path.resolve('./views/content/primary/canvas') , 'index.html') );
-           /*  mainPage.webContents.toggleDevTools(); */
-
-        }
-
-        if (navPage && mainPage) {
-
-            globalShortcut.register('CommandOrControl+Shift+I', () => {
-                // if (mainPage.webContents.isFocused()) {
-                //     mainPage.webContents.toggleDevTools();
-                // }
-                switch (true) {
-                    case ( mainPage.webContents.isFocused() ) :
-                        mainPage.webContents.toggleDevTools();
-                    break;
-                    case ( childView.webContents.isFocused() ) :
-                        childView.webContents.toggleDevTools();
-                    break;
-                }
-            });
-
-            /**
-             * @win32
-             * @linux
-             * @darwin
-             */
-            app.on('before-quit', () => {
-                // Unregister all shortcuts to clean up resources
-                globalShortcut.unregisterAll();
-            });
-
-
-            webContents.getAllWebContents().forEach((wcView)=>{
-
-                /* wcView.openDevTools(); */// # [PASSING]
-                wcView.executeJavaScript(
-                    importFileModule(import.meta.dirname, [`global-layout.js`])
-                );
-
-            });
-
-            parentView.on('resize', ()=>{
-                
-                parentView.setBounds({
-                    ...parentView.getBounds()
-                });
-
-                navPage.setBounds({
-                    x: 0,
-                    y: 0,
-                    width: parentView.getBounds().width,
-                    height: navPage.height,
-                });
-
-                mainPage.setBounds({
-                    x: 0,
-                    y: navPage.height,
-                    width: parentView.getBounds().width,
-                    height: Number( /* workAreaSize.height */parentView.getBounds().height - navPage.height ),
-                });
-                
-            });
-
-        }
-
-        /**
-         * Read more about Resource Management... 
-         * @see {@link https://www.electronjs.org/docs/latest/api/base-window#resource-management|Resource Management}
-         */
-        parentView.on('closed', () => {
-            navPage.webContents.close();
-            mainPage.webContents.close();
-        });
-
-        childView.on('closed', () => {
-            mainPage.webContents.focus();
-        });
-
-    }
-    
+  subscribeClosed(parentView, navPage, mainPage, childView);
 }
 
+function createParentView(workAreaSize) {
+  return new BaseWindow({
+    ...FRAMELESS_OPTIONS,
+    x: 0,
+    y: 0,
+    width: workAreaSize.width,
+    height: workAreaSize.height
+  });
+}
+
+function createMainPage() {
+  return new WebContentsView({
+    webPreferences: { devTools: !app.isPackaged }
+  });
+}
+
+function createNavPage() {
+  return new WebContentsView({
+    webPreferences: {
+      sandbox: false,
+      preload: viewPath('navigation', 'appbar', 'preload.mjs')
+    }
+  });
+}
+
+function createChildView(parentView) {
+  const childView = floatingWindow.init(parentView);
+  childView.loadFile(viewPath('content', 'secondary', 'gui', 'index.html'));
+
+  childView.webContents.on('did-finish-load', () => {
+    childView.webContents.executeJavaScriptInIsolatedWorld(1, [{
+      code: `
+        let appbar = document.getElementById('appbar');
+        appbar.style.height = 'auto';
+        appbar.children.button_minimize.style.display = 'none';
+        appbar.children.button_maximize.style.display = 'none';
+      `.trim()
+    }]);
+  });
+
+  return childView;
+}
+
+function setupIpcHandlers(ipcMain, parentView, childView, navPage, workAreaSize) {
+  if (!navPage) return;
+
+  Object.assign(navPage, { height: 40 });
+
+  ipcMain.handle('action:minimize', () => {
+    if (parentView.isMaximized) parentView.minimize();
+  });
+
+  ipcMain.handle('action:maximize', () => {
+    if (parentView.isMinimized) {
+      parentView.setBounds({
+        x: 0, y: 0,
+        width: workAreaSize.width,
+        height: workAreaSize.height
+      });
+    }
+  });
+
+  ipcMain.handle('action:close', () => {
+    if (parentView.isFocused()) parentView.close();
+    if (!parentView.isDestroyed() && childView.isFocused()) childView.close();
+  });
+}
+
+function addViewsToParent(parentView, navPage, mainPage) {
+  parentView.contentView.addChildView(navPage);
+  parentView.contentView.addChildView(mainPage);
+}
+
+function setNavPageBounds(navPage, workAreaSize) {
+  navPage.setBounds({
+    x: 0, y: 0,
+    width: workAreaSize.width,
+    height: navPage.height
+  });
+}
+
+function setMainPageBounds(mainPage, navPage, workAreaSize) {
+  mainPage.setBounds({
+    x: 0,
+    y: navPage.height,
+    width: workAreaSize.width,
+    height: workAreaSize.height - navPage.height
+  });
+}
+
+function registerGlobalShortcuts(mainPage, childView) {
+  globalShortcut.register('CommandOrControl+Shift+I', () => {
+    if (mainPage.webContents.isFocused()) mainPage.webContents.toggleDevTools();
+    else if (childView.webContents.isFocused()) childView.webContents.toggleDevTools();
+  });
+}
+
+function injectGlobalLayout() {
+  const viewsDir = import.meta.dirname;
+  webContents.getAllWebContents().forEach((wc) => {
+    wc.executeJavaScript(importFileModule(viewsDir, ['global-layout.js']));
+  });
+}
+
+function subscribeResize(parentView, navPage, mainPage) {
+  parentView.on('resize', () => {
+    parentView.setBounds({ ...parentView.getBounds() });
+    const { width, height } = parentView.getBounds();
+    navPage.setBounds({ x: 0, y: 0, width, height: navPage.height });
+    mainPage.setBounds({ x: 0, y: navPage.height, width, height: height - navPage.height });
+  });
+}
+
+function subscribeClosed(parentView, navPage, mainPage, childView) {
+  parentView.on('closed', () => {
+    navPage.webContents.close();
+    mainPage.webContents.close();
+  });
+  childView.on('closed', () => mainPage.webContents.focus());
+}

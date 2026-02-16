@@ -1,90 +1,72 @@
-/* DEV_NOTE # For syntax highlighting extension in VSC, credits to id:tobermory.es6-string-html (user:Tobermory) */
+/**
+ * 1) Registers custom elements: global-layout, control-button.
+ * 2) Builds appbar buttons (minimize, maximize, close) and mounts them.
+ * 3) Injects appbar and draggable-region styles.
+ */
+
+/* --- 1) Custom elements --- */
 customElements.define('global-layout', class extends HTMLElement {
-
-    connectedCallback(){
-        /* document.body.style.backgroundColor = 'yellow'; *//* [PASSING] */
-        const nav = document.createElement('nav');
-            nav.id = 'appbar';
-        this.appendChild(nav);
-    }
-
+  connectedCallback() {
+    const nav = document.createElement('nav');
+    nav.id = 'appbar';
+    this.appendChild(nav);
+  }
 });
 
-if (document){
-    document.body.appendChild(
-        new (customElements.get('global-layout'))
-    )
+if (document) {
+  document.body.appendChild(new (customElements.get('global-layout'))());
 }
 
-/* === */
+const CONTROL_BUTTON = 'control-button';
+customElements.define(CONTROL_BUTTON, class extends HTMLButtonElement {
+  constructor(symbol) {
+    super();
+    this.textContent = symbol;
+    this.style.padding = '0.5em';
+    this.style.userSelect = 'none';
+    return this;
+  }
+}, { extends: 'button' });
 
-const control_button = 'control-button';
-customElements.define(control_button, 
-class extends HTMLButtonElement {
-    constructor(symbol){
-        super()
-        this.textContent = symbol;
-        this.style.padding = "0.5em";
-        this.style.userSelect = 'none';
+/* --- 2) Appbar buttons --- */
+function createAppbarButtons() {
+  const control = customElements.get(CONTROL_BUTTON);
+  const minimize = Reflect.construct(control, [RegExp('\u{1F5D5}').source]);
+  minimize.id = 'button_minimize';
+  minimize.addEventListener('click', () => window.navigation_appbar.minimize());
 
-        return this;
-    }
-},
-{
-    extends: 'button'
-})
+  const maximize = Reflect.construct(control, [RegExp('\u{1F5D6}').source]);
+  maximize.id = 'button_maximize';
+  maximize.addEventListener('click', () => window.navigation_appbar.maximize());
 
-const button_minimize = Reflect.construct(customElements.get(control_button), [RegExp('\u{1F5D5}').source]);
-    button_minimize.id = 'button_minimize';
-    button_minimize.addEventListener('click', ()=> window.navigation_appbar.minimize());
-const button_maximize = Reflect.construct(customElements.get(control_button), [RegExp('\u{1F5D6}').source]);
-    button_maximize.id = 'button_maximize';
-    button_maximize.addEventListener('click', ()=> window.navigation_appbar.maximize());
-const button_close = Reflect.construct(customElements.get(control_button), [RegExp('\u{1F5D9}').source]);
-    button_close.id = 'button_close';
-    button_close.addEventListener('click', ()=> window.navigation_appbar.close());
+  const close = Reflect.construct(control, [RegExp('\u{1F5D9}').source]);
+  close.id = 'button_close';
+  close.addEventListener('click', () => window.navigation_appbar.close());
+
+  return [minimize, maximize, close];
+}
+
+function getAppbarStyleSheet() {
+  const appbar = document.getElementById('appbar');
+  const sheet = new CSSStyleSheet();
+  sheet.insertRule(`#${appbar.id} { height: 100vh; width: 100%; display: flex; justify-content: flex-end; background-color: rgb(230, 230, 230); }`);
+  sheet.insertRule(`#${appbar.id} > button { border: unset; background-color: inherit; }`);
+  sheet.insertRule(`#${appbar.id} > button:hover { background-color: rgb(200, 200, 200); }`);
+  return sheet;
+}
+
+function getDraggableRegionStyleSheet() {
+  const sheet = new CSSStyleSheet();
+  sheet.insertRule('nav { -webkit-app-region: drag; }');
+  sheet.insertRule('nav > button { -webkit-app-region: no-drag; }');
+  return sheet;
+}
 
 const appbar = document.getElementById('appbar');
-const appbar$css = new CSSStyleSheet()
-    appbar$css.insertRule(/* css */`
-        #${appbar.id} {
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-            background-color:rgb(230, 230, 230);
-        }
-    `.trim());
-    appbar$css.insertRule(/* css */`
-        #${appbar.id} > button {
-            border: unset;
-            background-color: inherit;
-        }
-    `.trim());
-    appbar$css.insertRule(/* css */`
-        #${appbar.id} > button:hover {
-            background-color:rgb(200, 200, 200);
-        }
-    `.trim());
+appbar.append(...createAppbarButtons());
 
-const draggableRegion$css = new CSSStyleSheet();
-    draggableRegion$css.insertRule(
-    /* css */`
-            nav {
-                -webkit-app-region: drag;
-                & > button {
-                    -webkit-app-region: no-drag;
-                }
-            }
-    `.trim());
-
-appbar.append(...[
-    button_minimize,
-    button_maximize,
-    button_close,
-])
-
-document.adoptedStyleSheets.push(...[
-    draggableRegion$css,
-    appbar$css,
-])
+/* --- 3) Styles --- */
+document.adoptedStyleSheets.push(
+  getDraggableRegionStyleSheet(),
+  getAppbarStyleSheet()
+);

@@ -50,7 +50,7 @@ export default class {
                 break;
 
                 case ENUMS.CASE.wireframe :
-
+                    // WireFrame (capital F) is the API name on HTMLCanvas.Views; implementation is wireframe_view
                     HTMLCanvas.Views.WireFrame.draw({
                         ENUMS,
                         context,

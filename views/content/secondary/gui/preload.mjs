@@ -1,8 +1,6 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { exposeActions } from '../../../../utils/preload-helper.mjs';
 
-contextBridge.exposeInMainWorld(`navigation_appbar`, {
-    trigger: async ()=> await ipcRenderer.invoke(`action:gui`)
-    ,
-    /** @implements */
-    close: async ()=> await ipcRenderer.invoke('action:close'),
+exposeActions('navigation_appbar', {
+  trigger: 'gui',
+  close: 'close'
 });

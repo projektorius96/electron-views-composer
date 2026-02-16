@@ -18,6 +18,15 @@ export const importFileModule = (dirname, pathspec)=>{
     );
 }
 
+/**
+ * Path to a file under views/ (project root is current working directory).
+ * @param {...string} segments - path parts under views, e.g. 'navigation', 'appbar', 'index.html'
+ * @returns {string} absolute path
+ */
+export const viewPath = (...segments) =>
+  node_path.join(node_path.resolve('.'), 'views', ...segments);
+
 export {
-    node_fs, node_path
-}
+  node_fs,
+  node_path
+};
