@@ -69,6 +69,7 @@ function createChildView(parentView) {
   
   /**
    * @debugging
+   * see - [commit:9fd0e6352b100a9a73243bdff537856f3385f442]
    */
   if (CONFIG.MAINTENANCE === true) {
     childView.close(); // DEV_NOTE # this is not the greatest way to handle the childView's UI design flaw, but better than nothing
@@ -78,7 +79,7 @@ function createChildView(parentView) {
     childView.webContents.executeJavaScriptInIsolatedWorld(1, [{
       code: `
         let appbar = document.getElementById('appbar');
-        appbar.style.height = 'auto'; /* DEV_NOTE (2/21/2026) # see - [commit:xyz] for "childView's UI design flaw" description in-detail... */
+        appbar.style.height = 'auto'; /* DEV_NOTE (2/21/2026) # see - [commit:9fd0e6352b100a9a73243bdff537856f3385f442] for "childView's UI design flaw" description in-detail... */
         appbar.children.button_minimize.style.display = 'none';
         appbar.children.button_maximize.style.display = 'none';
       `.trim()
