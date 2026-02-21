@@ -1,3 +1,4 @@
+import CONFIG from '../CONFIG.json' with { type: 'json' }
 import { app, screen, BaseWindow, WebContentsView, ipcMain, webContents, globalShortcut } from 'electron';
 import { viewPath, importFileModule } from '../utils/index.node.mjs';
 import { FRAMELESS_OPTIONS } from './_shared/window-options.mjs';
@@ -65,12 +66,19 @@ function createNavPage() {
 function createChildView(parentView) {
   const childView = floatingWindow.init(parentView);
   childView.loadFile(viewPath('content', 'secondary', 'gui', 'index.html'));
+  
+  /**
+   * @debugging
+   */
+  if (CONFIG.MAINTENANCE === true) {
+    childView.close(); // DEV_NOTE # this is not the greatest way to handle the childView's UI design flaw, but better than nothing
+  }
 
   childView.webContents.on('did-finish-load', () => {
     childView.webContents.executeJavaScriptInIsolatedWorld(1, [{
       code: `
         let appbar = document.getElementById('appbar');
-        appbar.style.height = 'auto';
+        appbar.style.height = 'auto'; /* DEV_NOTE (2/21/2026) # see - [commit:xyz] for "childView's UI design flaw" description in-detail... */
         appbar.children.button_minimize.style.display = 'none';
         appbar.children.button_maximize.style.display = 'none';
       `.trim()

@@ -22,7 +22,7 @@ customElements.define(CONTROL_BUTTON, class extends HTMLButtonElement {
   constructor(symbol) {
     super();
     this.textContent = symbol;
-    this.style.padding = '0.5em';
+    this.style.padding = '0 2rem';
     this.style.userSelect = 'none';
     return this;
   }
@@ -49,8 +49,8 @@ function createAppbarButtons() {
 function getAppbarStyleSheet() {
   const appbar = document.getElementById('appbar');
   const sheet = new CSSStyleSheet();
-  sheet.insertRule(`#${appbar.id} { height: 100vh; width: 100%; display: flex; justify-content: flex-end; background-color: rgb(230, 230, 230); }`);
-  sheet.insertRule(`#${appbar.id} > button { border: unset; background-color: inherit; }`);
+  sheet.insertRule(`#${appbar.id} { height: 100vh; width: 100%; display: flex; justify-content: flex-end; background-color: rgb(230, 230, 230); font-size: 2rem; line-height: 1.24; }`);
+  sheet.insertRule(`#${appbar.id} > button { border: unset; background-color: inherit; font-size: inherit; line-height: inherit; }`);
   sheet.insertRule(`#${appbar.id} > button:hover { background-color: rgb(200, 200, 200); }`);
   return sheet;
 }
