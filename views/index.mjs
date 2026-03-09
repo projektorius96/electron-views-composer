@@ -1,20 +1,18 @@
-import CONFIG from '../CONFIG.json' with { type: 'json' }
 import { app, screen, BaseWindow, WebContentsView, ipcMain, webContents, globalShortcut } from 'electron';
 import { viewPath, importFileModule } from '../utils/index.node.mjs';
 import { FRAMELESS_OPTIONS } from './_shared/window-options.mjs';
-import floatingWindow from './content/secondary/gui/main.mjs';
 
 export default function initViewsComposition() {
+
   const { workAreaSize } = screen.getPrimaryDisplay();
 
   const parentView = createParentView(workAreaSize);
-  if (!parentView) return;
+    if (!parentView) return;
 
   const mainPage = createMainPage();
   const navPage = createNavPage();
-  const childView = createChildView(parentView);
 
-  setupIpcHandlers(ipcMain, parentView, childView, navPage, workAreaSize);
+  setupIpcHandlers(ipcMain, parentView, navPage, workAreaSize);
 
   addViewsToParent(parentView, navPage, mainPage);
 
@@ -26,16 +24,33 @@ export default function initViewsComposition() {
   if (mainPage) {
     setMainPageBounds(mainPage, navPage, workAreaSize);
     mainPage.webContents.loadFile(viewPath('content', 'primary', 'canvas', 'index.html'));
+    mainPage.webContents.setWindowOpenHandler(({ frameName }) => {
+      if ( frameName.includes('id=pip-window-1') ) {
+        return {
+          action: 'allow',
+          overrideBrowserWindowOptions: {
+            // 1. Link it to the existing window
+            parent: parentView, 
+            width: 300,
+            height: 300,
+            frame: true, // Modals usually look better with a standard frame
+              autoHideMenuBar: true,        
+          }
+        }
+      }
+      return { action: 'deny' }
+    })
   }
 
   if (navPage && mainPage) {
-    registerGlobalShortcuts(mainPage, childView);
+    registerGlobalShortcuts(mainPage);
     app.on('before-quit', () => globalShortcut.unregisterAll());
     injectGlobalLayout();
     subscribeResize(parentView, navPage, mainPage);
   }
 
-  subscribeClosed(parentView, navPage, mainPage, childView);
+  subscribeClosed(parentView, navPage, mainPage);
+
 }
 
 function createParentView(workAreaSize) {
@@ -63,33 +78,7 @@ function createNavPage() {
   });
 }
 
-function createChildView(parentView) {
-  const childView = floatingWindow.init(parentView);
-  childView.loadFile(viewPath('content', 'secondary', 'gui', 'index.html'));
-  
-  /**
-   * @debugging
-   * see - [commit:9fd0e6352b100a9a73243bdff537856f3385f442]
-   */
-  if (CONFIG.MAINTENANCE === true) {
-    childView.close(); // DEV_NOTE # this is not the greatest way to handle the childView's UI design flaw, but better than nothing
-  }
-
-  childView.webContents.on('did-finish-load', () => {
-    childView.webContents.executeJavaScriptInIsolatedWorld(1, [{
-      code: `
-        let appbar = document.getElementById('appbar');
-        appbar.style.height = 'auto'; /* DEV_NOTE (2/21/2026) # see - [commit:9fd0e6352b100a9a73243bdff537856f3385f442] for "childView's UI design flaw" description in-detail... */
-        appbar.children.button_minimize.style.display = 'none';
-        appbar.children.button_maximize.style.display = 'none';
-      `.trim()
-    }]);
-  });
-
-  return childView;
-}
-
-function setupIpcHandlers(ipcMain, parentView, childView, navPage, workAreaSize) {
+function setupIpcHandlers(ipcMain, parentView, navPage, workAreaSize) {
   if (!navPage) return;
 
   Object.assign(navPage, { height: 40 });
@@ -110,7 +99,6 @@ function setupIpcHandlers(ipcMain, parentView, childView, navPage, workAreaSize)
 
   ipcMain.handle('action:close', () => {
     if (parentView.isFocused()) parentView.close();
-    if (!parentView.isDestroyed() && childView.isFocused()) childView.close();
   });
 }
 
@@ -136,10 +124,9 @@ function setMainPageBounds(mainPage, navPage, workAreaSize) {
   });
 }
 
-function registerGlobalShortcuts(mainPage, childView) {
+function registerGlobalShortcuts(mainPage) {
   globalShortcut.register('CommandOrControl+Shift+I', () => {
     if (mainPage.webContents.isFocused()) mainPage.webContents.toggleDevTools();
-    else if (childView.webContents.isFocused()) childView.webContents.toggleDevTools();
   });
 }
 
@@ -159,10 +146,9 @@ function subscribeResize(parentView, navPage, mainPage) {
   });
 }
 
-function subscribeClosed(parentView, navPage, mainPage, childView) {
+function subscribeClosed(parentView, navPage, mainPage) {
   parentView.on('closed', () => {
     navPage.webContents.close();
     mainPage.webContents.close();
   });
-  childView.on('closed', () => mainPage.webContents.focus());
 }
