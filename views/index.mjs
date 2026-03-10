@@ -6,23 +6,18 @@ export default function initViewsComposition() {
 
   const { workAreaSize } = screen.getPrimaryDisplay();
 
-  const parentView = createParentView(workAreaSize);
+  const parentView = createParentView({workAreaSize});
     if (!parentView) return;
 
   const mainPage = createMainPage();
-  const navPage = createNavPage();
 
-  setupIpcHandlers(ipcMain, parentView, navPage, workAreaSize);
+  // DEV_NOTE # leaving as an example for any of future IPCs
+  /* setupIpcHandlers(ipcMain, parentView, workAreaSize); */
 
-  addViewsToParent(parentView, navPage, mainPage);
-
-  if (navPage) {
-    setNavPageBounds(navPage, workAreaSize);
-    navPage.webContents.loadFile(viewPath('navigation', 'appbar', 'index.html'));
-  }
+  addViewsToParent(parentView, mainPage);
 
   if (mainPage) {
-    setMainPageBounds(mainPage, navPage, workAreaSize);
+    setMainPageBounds(mainPage, workAreaSize);
     mainPage.webContents.loadFile(viewPath('content', 'primary', 'canvas', 'index.html'));
     mainPage.webContents.setWindowOpenHandler(({ frameName }) => {
       if ( frameName.includes('id=pip-window-1') ) {
@@ -42,25 +37,31 @@ export default function initViewsComposition() {
     })
   }
 
-  if (navPage && mainPage) {
+  if (mainPage) {
     registerGlobalShortcuts(mainPage);
     app.on('before-quit', () => globalShortcut.unregisterAll());
-    injectGlobalLayout();
-    subscribeResize(parentView, navPage, mainPage);
+    /* injectGlobalLayout(); */
+    subscribeResize(parentView, mainPage);
   }
 
-  subscribeClosed(parentView, navPage, mainPage);
+  subscribeClosed(parentView, mainPage);
 
 }
 
-function createParentView(workAreaSize) {
-  return new BaseWindow({
+function createParentView({workAreaSize, maximized = true}) {
+  
+  const baseWindow = new BaseWindow({
     ...FRAMELESS_OPTIONS,
     x: 0,
     y: 0,
     width: workAreaSize.width,
     height: workAreaSize.height
   });
+
+  if (maximized) baseWindow.maximize();
+
+  return baseWindow;
+
 }
 
 function createMainPage() {
@@ -69,19 +70,7 @@ function createMainPage() {
   });
 }
 
-function createNavPage() {
-  return new WebContentsView({
-    webPreferences: {
-      sandbox: false,
-      preload: viewPath('navigation', 'appbar', 'preload.mjs')
-    }
-  });
-}
-
-function setupIpcHandlers(ipcMain, parentView, navPage, workAreaSize) {
-  if (!navPage) return;
-
-  Object.assign(navPage, { height: 40 });
+function setupIpcHandlers(ipcMain, parentView, workAreaSize) {
 
   ipcMain.handle('action:minimize', () => {
     if (parentView.isMaximized) parentView.minimize();
@@ -100,27 +89,19 @@ function setupIpcHandlers(ipcMain, parentView, navPage, workAreaSize) {
   ipcMain.handle('action:close', () => {
     if (parentView.isFocused()) parentView.close();
   });
+
 }
 
-function addViewsToParent(parentView, navPage, mainPage) {
-  parentView.contentView.addChildView(navPage);
+function addViewsToParent(parentView, mainPage) {
   parentView.contentView.addChildView(mainPage);
 }
 
-function setNavPageBounds(navPage, workAreaSize) {
-  navPage.setBounds({
-    x: 0, y: 0,
-    width: workAreaSize.width,
-    height: navPage.height
-  });
-}
-
-function setMainPageBounds(mainPage, navPage, workAreaSize) {
+function setMainPageBounds(mainPage, workAreaSize) {
   mainPage.setBounds({
     x: 0,
-    y: navPage.height,
+    y: 0,
     width: workAreaSize.width,
-    height: workAreaSize.height - navPage.height
+    height: workAreaSize.height
   });
 }
 
@@ -137,18 +118,16 @@ function injectGlobalLayout() {
   });
 }
 
-function subscribeResize(parentView, navPage, mainPage) {
+function subscribeResize(parentView, mainPage) {
   parentView.on('resize', () => {
     parentView.setBounds({ ...parentView.getBounds() });
     const { width, height } = parentView.getBounds();
-    navPage.setBounds({ x: 0, y: 0, width, height: navPage.height });
-    mainPage.setBounds({ x: 0, y: navPage.height, width, height: height - navPage.height });
+    mainPage.setBounds({ x: 0, y: 0, width, height });
   });
 }
 
-function subscribeClosed(parentView, navPage, mainPage) {
+function subscribeClosed(parentView, mainPage) {
   parentView.on('closed', () => {
-    navPage.webContents.close();
     mainPage.webContents.close();
   });
 }
