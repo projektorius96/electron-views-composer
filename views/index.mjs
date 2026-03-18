@@ -1,6 +1,6 @@
 import { app, screen, BaseWindow, WebContentsView, ipcMain, webContents, globalShortcut } from 'electron';
 import { viewPath, importFileModule } from '../utils/index.node.mjs';
-import { FRAMELESS_OPTIONS } from './_shared/window-options.mjs';
+import { WIDGET_BOUND, WINDOW_BOUND } from './_shared/window-options.mjs';
 
 export default function initViewsComposition() {
 
@@ -25,11 +25,19 @@ export default function initViewsComposition() {
           action: 'allow',
           overrideBrowserWindowOptions: {
             // 1. Link it to the existing window
-            parent: parentView, 
-            width: 300,
-            height: 300,
-            frame: true, // Modals usually look better with a standard frame
-              autoHideMenuBar: true,        
+            parent: parentView,
+            /* === */
+              /**
+               * @defaults
+               */
+              ...WIDGET_BOUND.init(null),
+              /**
+               * @override
+               */
+              width: 300,
+              height: 300,
+            /* === */
+
           }
         }
       }
@@ -51,11 +59,8 @@ export default function initViewsComposition() {
 function createParentView({workAreaSize, maximized = true}) {
   
   const baseWindow = new BaseWindow({
-    ...FRAMELESS_OPTIONS,
-    x: 0,
-    y: 0,
-    width: workAreaSize.width,
-    height: workAreaSize.height
+    ...WIDGET_BOUND.init(null),
+    ...WINDOW_BOUND.init(workAreaSize),
   });
 
   if (maximized) baseWindow.maximize();
@@ -79,9 +84,7 @@ function setupIpcHandlers(ipcMain, parentView, workAreaSize) {
   ipcMain.handle('action:maximize', () => {
     if (parentView.isMinimized) {
       parentView.setBounds({
-        x: 0, y: 0,
-        width: workAreaSize.width,
-        height: workAreaSize.height
+        ...WIDGET_BOUND.init(null)
       });
     }
   });
@@ -98,10 +101,7 @@ function addViewsToParent(parentView, mainPage) {
 
 function setMainPageBounds(mainPage, workAreaSize) {
   mainPage.setBounds({
-    x: 0,
-    y: 0,
-    width: workAreaSize.width,
-    height: workAreaSize.height
+    ...WINDOW_BOUND.init(workAreaSize),
   });
 }
 
@@ -122,7 +122,7 @@ function subscribeResize(parentView, mainPage) {
   parentView.on('resize', () => {
     parentView.setBounds({ ...parentView.getBounds() });
     const { width, height } = parentView.getBounds();
-    mainPage.setBounds({ x: 0, y: 0, width, height });
+      mainPage.setBounds({ x: 0, y: 0, width, height });
   });
 }
 
