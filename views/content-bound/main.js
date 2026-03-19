@@ -1,0 +1,2 @@
+// // DEV_NOTE # look for `mainPage.webContents.setWindowOpenHandler` (main-end of the render-end) in `<root>/views/index.mjs` file
+window.open(window.origin, 'id=pip-window-1'); //  render-end of the main-end
