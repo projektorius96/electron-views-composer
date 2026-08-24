@@ -6,7 +6,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "electron": "^41.0.2"
+    "electron": "^43.4.1"
   },
   "scripts": {
     "start": "nodemon --exec npx electron main.mjs"

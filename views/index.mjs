@@ -1,5 +1,7 @@
-import { app, screen, BaseWindow, WebContentsView, ipcMain, webContents, globalShortcut } from 'electron';
-import { viewPath, importFileModule } from '../utils/index.node.mjs';
+import url from 'node:url';
+import node_path from 'node:path';
+import { app, screen, BaseWindow, WebContentsView, webContents, globalShortcut } from 'electron';
+import { importFileModule } from '../utils/index.node.mjs';
 import { WIDGET_BOUND, WINDOW_BOUND } from './window-options.mjs';
 
 export default function initViewsComposition() {
@@ -11,7 +13,6 @@ export default function initViewsComposition() {
 
   const mainPage = createMainPage();
 
-
   // DEV_NOTE # leaving as an example for any of future IPCs
   /* setupIpcHandlers(ipcMain, parentView, workAreaSize); */
 
@@ -19,11 +20,17 @@ export default function initViewsComposition() {
 
   if (mainPage) {
     setMainPageBounds(mainPage, workAreaSize);
-    /* mainPage.webContents.loadFile(viewPath('content', 'primary', 'canvas', 'index.html')); */
-    const prefix = 'content';
-    const path = viewPath('layout.html');
-    mainPage.webContents.loadURL(`file:///${path}?prefix=${prefix}`);
+
+    const fileUrl = url.pathToFileURL(
+      node_path.resolve(import.meta.dirname, 'layout.html')
+    ); 
+
+    fileUrl.searchParams.append('prefix', 'content-bound');
+    
+    mainPage.webContents.loadURL(fileUrl.href);
+    
     mainPage.webContents.toggleDevTools();
+
     mainPage.webContents.setWindowOpenHandler(({ frameName }) => {
       if ( frameName.includes('id=pip-window-1') ) {
         return {

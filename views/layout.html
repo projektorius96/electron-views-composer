@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- Canonical head: views/_shared/html-head.html -->
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" />
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-    <title></title>
+    <!-- Combined into one clean CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';" />
+    <title>Electron App</title>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     </style>
-    <script type="module" src="./renderer.js"></script>
+    <!-- Keep this as type="module" -->
+    <script type="module" src="renderer.js"></script>
 </head>
-    <body></body>
+<body></body>
 </html>

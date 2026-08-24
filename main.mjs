@@ -2,6 +2,11 @@ import { app, BaseWindow } from 'electron';
 import initViewsComposition from './views/index.mjs'
 
 /**
+ * @app.beforeReady
+ */
+app.disableHardwareAcceleration();
+
+/**
  * Managing application lifecycle
  * @see {@link https://www.electronjs.org/docs/latest/tutorial/tutorial-first-app#managing-your-apps-window-lifecycle}
  */

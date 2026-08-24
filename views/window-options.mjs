@@ -1,6 +1,6 @@
 /**
- * Shared options for frameless windows (BaseWindow / BrowserWindow).
- * When frame is false, autoHideMenuBar has no effect; kept for consistency.
+ * Shared options for BaseWindow / BrowserWindow instances.
+ * When {frame} is set to `false`, `autoHideMenuBar` has no effect;
  */
 export const WIDGET_BOUND = 
   Object.freeze(
